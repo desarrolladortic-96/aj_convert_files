@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% load plotly_dash %}
+
+    <div class="{% plotly_class name='Analisis_Atributos' %} card" style="background-color: transparent; height: 100vh; width: 100%;">
+        {% plotly_app name='Analisis_Atributos' ratio=0.5 %}
+    </div>
+
+{% endblock %}

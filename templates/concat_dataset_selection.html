@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .mosaic-button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 5px;
+        background-color: #785DC7; /* Updated button background color */
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        text-transform: uppercase; /* Added for better button text styling */
+    }
+
+    .mosaic-button:hover {
+        background-color: #6249A8; /* Darker shade for hover */
+    }
+
+    .form-container {
+        max-width: 800px; /* Increased width */
+        margin: 20px auto;
+        padding: 30px; /* Increased padding */
+        background-color: #333;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-container p, .form-container h1, .form-container button {
+        color: #fff;
+        text-align: center;
+    }
+
+    .form-container .back-button {
+        background-color: #785DC7; /* Updated button background color */
+        border: none;
+        padding: 8px 12px; /* Adjusted padding for smaller button */
+        margin-top: 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 14px; /* Smaller text size */
+    }
+
+    .form-container .back-button:hover {
+        background-color: #6249A8; /* Darker shade for hover */
+    }
+
+    .form-container .back-button a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+        .form-container {
+            padding: 20px;
+            margin: 10px;
+        }
+
+        .mosaic-button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .form-container .back-button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<h1 style="color:#fff; text-align: center;">Selección de datos</h1>
+
+<div class="form-container">
+    {% if tareas %}
+        {% for nombre_archivo_short, nombre_archivo in tareas %}
+            <form method="post" action="{% url 'concat_dataset_selection' %}" style="display: inline-block; margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="archivo" value="{{ nombre_archivo }}">
+                <button type="submit" class="mosaic-button" aria-label="Seleccionar {{ nombre_archivo_short }}">{{ nombre_archivo_short }}</button>
+            </form>
+        {% endfor %}
+    {% else %}
+        <p>No hay tareas para procesar</p>
+    {% endif %}
+
+    <br>
+
+    <button class="back-button">
+        <a href="{% url 'home' %}" aria-label="Volver a inicio">REGRESAR</a>
+    </button>
+</div>
+
+{% endblock %}

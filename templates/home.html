@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load plotly_dash %}
+
+<style>
+  .mosaic-button {
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 4px;
+    background: linear-gradient(135deg, #785DC7, #6249A8); /* Updated gradient color */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .mosaic-button:hover {
+    background-color: #785DC7; /* Updated hover color */
+  }
+
+  .message-box {
+    animation: fadeInOut 7s infinite;
+    position: absolute;
+    width: 90%;
+    max-width: 300px;
+    padding: 10px;
+    background-color: rgba(120, 93, 199, 0.8); /* Updated background color */
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .UserDashboard {
+    overflow: hidden;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    overflow: -moz-scrollbars-none;
+    scrollbar-width: none;
+  }
+</style>
+
+{% if user.is_authenticated %}
+
+  <h1 style="color:#fff; text-align: center;">Funciones</h1>
+
+    <a href="/analisis_atributos_selection/" class="mosaic-button">Análisis de atributos</a>
+    <a href="/edit_file_selection/" class="mosaic-button">Editar bases de datos</a>
+    <a href="/pygwalker_selection/" class="mosaic-button">Pygwalker</a>
+    <a href="/concat_dataset_selection/" class="mosaic-button">Alimentar bases de datos</a>
+    <a href="/aspirantes_x_historico_selection/" class="mosaic-button">Aspirantes x Histórico de modelos</a>
+    
+   <br>
+   <br>
+  
+  <div class="{% plotly_class name='UserDashboard' %} card hide-scrollbar" style="background-color: transparent; width: 100%; height: 25%;">
+      {% plotly_app name='UserDashboard' ratio=0.5 %}
+  </div>
+
+{% else %}
+  <div class="container mt-5">
+    <div class="message-container" id="messageContainer">
+      <div class="message-box" id="messageBox1">
+        <p>Descubre cómo nuestro aplicativo puede ayudarte en el análisis avanzado de datos.</p>
+      </div>
+      <div class="message-box" id="messageBox2">
+        <p>Optimiza tus procesos con nuestras herramientas de gestión y análisis.</p>
+      </div>
+      <div class="message-box" id="messageBox3">
+        <p>Accede a nuestras soluciones innovadoras.</p>
+      </div>
+      <div class="message-box" id="messageBox4">
+        <p>En el análisis de datos, cada número cuenta una historia.</p>
+      </div>
+      <div class="message-box" id="messageBox5">
+        <p>No es solo el volumen de datos, sino la profundidad de tu análisis lo que impulsa la transformación.</p>
+      </div>
+      <div class="message-box" id="messageBox6">
+        <p>Transforma la información en acción.</p>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const userDashboard = document.querySelector('.UserDashboard');
+    if (userDashboard) {
+      userDashboard.style.overflow = 'hidden'; 
+      userDashboard.addEventListener('wheel', function(event) {
+        event.preventDefault(); 
+      }, { passive: false });
+      userDashboard.addEventListener('touchmove', function(event) {
+        event.preventDefault(); 
+      }, { passive: false });
+    }
+
+    document.body.style.overflow = 'hidden';
+  });
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const messageBoxes = document.querySelectorAll('.message-box');
+    const messageContainer = document.querySelector('.message-container');
+    const containerTop = messageContainer.offsetTop;
+    const containerHeight = messageContainer.offsetHeight;
+    const containerWidth = messageContainer.offsetWidth;
+    const windowHeight = window.innerHeight;
+    const bottomLimit = windowHeight - containerTop - containerHeight;
+
+    let positions = [];
+    const maxCycles = 5;
+    let cycles = 0;
+
+    function animateMessageBox(messageBox, index) {
+        const fadeDuration = 1000;
+        const displayDuration = 5000;
+
+        function setRandomPosition() {
+            let positionFound = false;
+            const maxAttempts = 10;
+            let attempts = 0;
+
+            while (!positionFound && attempts < maxAttempts) {
+                const randomTop = getRandomPosition(containerTop, bottomLimit, messageBox.offsetHeight);
+                const randomLeft = getRandomPosition(0, containerWidth, messageBox.offsetWidth);
+
+                if (!isPositionOccupied(randomTop, randomLeft, messageBox)) {
+                    messageBox.style.top = randomTop + 'px';
+                    messageBox.style.left = randomLeft + 'px';
+                    positions[index] = { top: randomTop, left: randomLeft, element: messageBox };
+                    positionFound = true;
+                }
+
+                attempts++;
+            }
+
+            if (!positionFound) {
+                console.warn('No suitable position found for', messageBox);
+            }
+        }
+
+        function fadeOut() {
+            messageBox.style.opacity = '0';
+            setTimeout(() => {
+                setRandomPosition();
+                fadeIn();
+            }, fadeDuration);
+        }
+
+        function fadeIn() {
+            messageBox.style.opacity = '1';
+            setTimeout(() => {
+                fadeOut();
+            }, displayDuration);
+        }
+
+        setRandomPosition();
+        fadeIn();
+    }
+
+    function isPositionOccupied(top, left, messageBox) {
+        return positions.some(pos => {
+            return !(top > pos.top + messageBox.offsetHeight ||
+                top + messageBox.offsetHeight < pos.top ||
+                left > pos.left + messageBox.offsetWidth ||
+                left + messageBox.offsetWidth < pos.left);
+        });
+    }
+
+    function getRandomPosition(min, max, size) {
+        return Math.floor(Math.random() * (max - min - size)) + min;
+    }
+
+    function showButtons() {
+        messageContainer.classList.add('hidden');
+        const buttonContainer = document.querySelector('.button-container');
+        if (buttonContainer) {
+            buttonContainer.classList.remove('hidden');
+        }
+    }
+
+    function trackCycles() {
+        cycles++;
+        if (cycles >= maxCycles) {
+            showButtons();
+        } else {
+            setTimeout(trackCycles, 5000);
+        }
+    }
+
+    messageBoxes.forEach((messageBox, index) => {
+        animateMessageBox(messageBox, index);
+    });
+
+    trackCycles();
+  });
+</script>
+
+{% endblock %}
